@@ -4,8 +4,8 @@ all:
 release:
 	stack build --pedantic
 
-run:
-	stack exec sd
+example: all
+	cd example; stack exec sd -- adserver.hs -o adserver.gml
 
 install:
 	stack install
