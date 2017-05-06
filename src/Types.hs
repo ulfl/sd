@@ -5,7 +5,6 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 module Types where
 
-import Data.Hashable (Hashable)
 import Data.String (IsString)
 import Text.Printf (printf)
 
@@ -16,7 +15,7 @@ instance Show NodeId where
  
 newtype NodeName =
     NodeName String
-    deriving (Eq, Ord, Hashable, IsString)
+    deriving (Eq, Ord, IsString)
 
 data Style
     = Default

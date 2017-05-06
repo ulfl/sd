@@ -24,7 +24,7 @@ interpretHaskell filePath typeWitness = do
         runInterpreter $ do
             loadModules [filePath]
             setImports ["Prelude", "Types", moduleName]
-            interpret (moduleName ++ ".main") typeWitness --(as :: Graph)
+            interpret (moduleName ++ ".main") typeWitness
     case res of
         Left err -> do
             case err of

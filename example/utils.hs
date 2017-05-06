@@ -5,7 +5,6 @@ module Utils where
 import Data.String
 import Text.Printf
 
-import GraphOps
 import Types
 
 nodesInGroups :: NodeName -> [NodeName] -> [Graph]
