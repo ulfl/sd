@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Adserver where
+module AdServer where
 
 import Types
 import Utils

@@ -19,12 +19,11 @@ interpretHaskell
     => String -> a -> IO a
 interpretHaskell filePath typeWitness = do
     let baseName = takeBaseName filePath
-    let moduleName = capitalize baseName
     res <-
         runInterpreter $ do
             loadModules [filePath]
-            setImports ["Prelude", "Types", moduleName]
-            interpret (moduleName ++ ".main") typeWitness
+            setImports ["Prelude", "Types", baseName]
+            interpret (baseName ++ ".main") typeWitness
     case res of
         Left err -> do
             case err of

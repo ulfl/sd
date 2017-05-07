@@ -137,7 +137,7 @@ internalError = error "Internal error."
 
 header :: String
 header =
-    [str|Creator "hgml"
+    [str|Creator "sd"
         |graph
         |[
         |  hierarchic 1
