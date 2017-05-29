@@ -17,13 +17,13 @@ newtype NodeName =
     NodeName String
     deriving (Eq, Ord, IsString)
 
+instance Show NodeName where
+    show (NodeName name) = printf "%s" name
+
 data Style
     = Default
     | InvisibleLabel
     deriving (Eq, Show)
-
-instance Show NodeName where
-    show (NodeName name) = printf "%s" name
 
 data Edge =
     Arrow [NodeName]
@@ -40,6 +40,9 @@ data Graph
             [Graph]
             [Edge]
             (Maybe Annotation)
+    | Level NodeName
+            Graph
+    | Empty
     deriving (Show)
 
 gBox :: NodeName -> Graph
@@ -51,12 +54,23 @@ gGroup name children edges = Group name Default children edges Nothing
 gGroupInvisibleLabel :: NodeName -> [Graph] -> [Edge] -> Graph
 gGroupInvisibleLabel name children edges = Group name InvisibleLabel children edges Nothing
 
+-- Recursively nest a set of graphs inside groups with the provided names.
 gGroupNested :: [NodeName] -> [Graph] -> [Edge] -> Graph
 gGroupNested names children edges =
     foldr
         (\name acc -> Group name Default [acc] [] Nothing)
         (Group (last names) Default children edges Nothing)
         (init names)
+
+gGroupNestedWithLevel :: [NodeName] -> NodeName -> [Graph] -> [Edge] -> Graph
+gGroupNestedWithLevel names level children edges =
+    foldr
+        (\name acc -> Group name Default [acc] [] Nothing)
+        (Group (last names) Default (map (gLevel level) children ) edges Nothing)
+        (init names)
+
+gLevel :: NodeName -> Graph -> Graph
+gLevel name child = Level name child
 
 gArrow :: [NodeName] -> [NodeName] -> Edge
 gArrow node1 node2 = Arrow node1 node2

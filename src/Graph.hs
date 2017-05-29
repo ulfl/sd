@@ -3,8 +3,6 @@
 
 module Graph where
 
-import Data.List (partition, sortBy)
-
 import Types
 
 -- Assign node numbers to all nodes in the graph and add annotation consisting
@@ -36,6 +34,8 @@ annotateGraph' graph basePath nodeId parentId =
                      annotatedChildren
                      (scopeEdges path' edges)
                      (Just (Annotation path' nodeId' parentId)))
+        Level _ child -> annotateGraph' child basePath nodeId parentId
+        Empty -> (nodeId, Empty)
   where
     inc :: NodeId -> NodeId
     inc (NodeId x) = NodeId (x + 1)

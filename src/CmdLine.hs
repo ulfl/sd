@@ -1,5 +1,6 @@
 -- Copyright (C) 2017 Ulf Leopold.
 {-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module CmdLine
     ( cmd
@@ -31,11 +32,10 @@ cmd :: IO ()
 cmd = do
     Sd {inputFile = inFile, outputFile = outFile} <- (cmdArgs cfg)
     res <- interpretGraph inFile
-    let res' = combineGraph res
-    let res'' = annotateGraph res'
+    let res' = (annotateGraph . combineGraph . (pruneBelowLevel "NodeDetails")) res
     case outFile == "" of
-        True -> dump stdout res''
-        False -> withFile outFile WriteMode $ \handle -> do dump handle res''
+        True -> dump stdout res'
+        False -> withFile outFile WriteMode $ \handle -> do dump handle res'
   where
     dump :: Handle -> Graph -> IO ()
     dump handle graph = do

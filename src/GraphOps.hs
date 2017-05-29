@@ -49,3 +49,18 @@ meld' ((Group name style children edges Nothing):(Group name' style' children' e
             (Group name style children edges Nothing) :
             meld' ((Group name' style' children' edges' Nothing) : rest)
 meld' graphs = graphs
+
+-- Remove all nodes below 'Level 'nodes with name 'NodeName'. Also remove all
+-- 'Level' nodes themselves.
+pruneBelowLevel :: NodeName -> Graph -> Graph
+pruneBelowLevel level (Level level' graph)
+    | level == level' = Empty
+    | otherwise = graph
+pruneBelowLevel level (Group name style children edges Nothing) =
+    Group name style (map (pruneBelowLevel level) children) edges Nothing
+pruneBelowLevel _level box@(Box _name Nothing) = box
+pruneBelowLevel _level Empty = Empty
+pruneBelowLevel _level _ = internalError
+
+internalError :: a
+internalError = error "Internal error."

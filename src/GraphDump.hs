@@ -86,6 +86,10 @@ dumpNodes handle fullGraph graph = do
             edges' <- mapM (dumpNodes handle fullGraph) children
             pure $ (edges ++ (concat edges'))
         Group _ _ _ _ Nothing -> internalError
+        Level _ child -> do
+            edges <- dumpNodes handle fullGraph child
+            pure edges
+        Empty -> pure []
   where
     nodeWidth :: NodeName -> String
     nodeWidth name =
@@ -107,17 +111,27 @@ dumpEdge handle fullGraph (Arrow n1 n2) = do
                 |   ]
                 | ]
                 |]
-    hPrintf
-        handle
-        edgeStr
-        (show (lookupNode n1 fullGraph))
-        (show (lookupNode n2 fullGraph))
+    let res = do
+            id1 <- lookupNode n1 fullGraph
+            id2 <- lookupNode n2 fullGraph
+            pure (id1, id2)
+    case res of
+        Right (id1, id2) -> hPrintf handle edgeStr (show id1) (show id2)
+        Left msg ->
+            error $
+            printf
+                ("Can't find (or can find more than one) endpoint %s " ++
+                 "on edge\n: (%s, %s)")
+                msg
+                (show n1)
+                (show n2)
   where
-    lookupNode :: [NodeName] -> Graph -> NodeId
+    lookupNode :: [NodeName] -> Graph -> Either String NodeId
     lookupNode path graph =
         case lookupNode' path graph of
-            [nodeId] -> nodeId
-            _ -> error (printf "Name not found %s" $ show path)
+            [nodeId] -> Right nodeId
+            (_:_) -> Left $ show path
+            [] -> Left $ show path
     lookupNode' :: [NodeName] -> Graph -> [NodeId]
     lookupNode' path graph =
         case graph of
@@ -131,6 +145,8 @@ dumpEdge handle fullGraph (Arrow n1 n2) = do
                     True -> [nodeId]
                     False -> concat $ map (lookupNode' path) children
             Group _ _ _ _ Nothing -> internalError
+            Level _ child -> lookupNode' path child
+            Empty -> []
 
 internalError :: a
 internalError = error "Internal error."
