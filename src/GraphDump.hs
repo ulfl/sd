@@ -11,8 +11,11 @@ import Text.Printf (printf, hPrintf)
 import Types
 
 -- Dump nodes and edges of a Graph to GML format.
-dumpGml :: Graph -> Graph -> Handle -> IO ()
-dumpGml fullGraph graph handle = do
+dumpGml :: Graph -> Handle -> IO ()
+dumpGml graph handle = dumpGml' graph graph handle
+
+dumpGml' :: Graph -> Graph -> Handle -> IO ()
+dumpGml' fullGraph graph handle = do
     edges <- dumpNodes handle fullGraph graph
     mapM_ (dumpEdge handle fullGraph) edges
 

@@ -40,5 +40,5 @@ cmd = do
     dump :: Handle -> Graph -> IO ()
     dump handle graph = do
         hPutStrLn handle header
-        dumpGml graph graph handle
+        dumpGml graph handle
         hPutStrLn handle footer
