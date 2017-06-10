@@ -58,7 +58,7 @@ pruneBelowLevel level (Level level' graph)
     | otherwise = graph
 pruneBelowLevel level (Group name style children edges Nothing) =
     Group name style (map (pruneBelowLevel level) children) edges Nothing
-pruneBelowLevel _level box@(Box _name Nothing) = box
+pruneBelowLevel _level box@(Node _name _dataRetention Nothing) = box
 pruneBelowLevel _level Empty = Empty
 pruneBelowLevel _level _ = internalError
 

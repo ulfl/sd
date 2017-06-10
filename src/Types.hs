@@ -3,16 +3,18 @@
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+
 module Types where
 
 import Data.String (IsString)
 import Text.Printf (printf)
 
-newtype NodeId = NodeId Integer
+newtype NodeId =
+    NodeId Integer
 
 instance Show NodeId where
     show (NodeId nodeId) = show nodeId
- 
+
 newtype NodeName =
     NodeName String
     deriving (Eq, Ord, IsString)
@@ -20,7 +22,14 @@ newtype NodeName =
 instance Show NodeName where
     show (NodeName name) = printf "%s" name
 
-data Style
+data DataRetention
+    = Stateless
+    | Days
+    | Months
+    | Years
+    deriving (Eq, Show)
+
+data GroupStyle
     = Default
     | InvisibleLabel
     deriving (Eq, Show)
@@ -30,13 +39,18 @@ data Edge =
           [NodeName]
     deriving (Show)
 
-data Annotation = Annotation [NodeName] NodeId NodeId deriving (Show)
+data Annotation =
+    Annotation [NodeName]
+               NodeId
+               NodeId
+    deriving (Show)
 
 data Graph
-    = Box NodeName
-          (Maybe Annotation)
+    = Node NodeName
+           DataRetention
+           (Maybe Annotation)
     | Group NodeName
-            Style
+            GroupStyle
             [Graph]
             [Edge]
             (Maybe Annotation)
@@ -45,14 +59,22 @@ data Graph
     | Empty
     deriving (Show)
 
-gBox :: NodeName -> Graph
-gBox name = Box name Nothing
+gNodeStateless :: NodeName -> Graph
+gNodeStateless name = Node name Stateless Nothing
+
+gNode :: NodeName -> DataRetention -> Graph
+gNode name dataRetention = Node name dataRetention Nothing
+
+gActor = gNodeStateless
+
+gBox = gNodeStateless
 
 gGroup :: NodeName -> [Graph] -> [Edge] -> Graph
 gGroup name children edges = Group name Default children edges Nothing
 
 gGroupInvisibleLabel :: NodeName -> [Graph] -> [Edge] -> Graph
-gGroupInvisibleLabel name children edges = Group name InvisibleLabel children edges Nothing
+gGroupInvisibleLabel name children edges =
+    Group name InvisibleLabel children edges Nothing
 
 -- Recursively nest a set of graphs inside groups with the provided names.
 gGroupNested :: [NodeName] -> [Graph] -> [Edge] -> Graph
@@ -66,7 +88,7 @@ gGroupNestedWithLevel :: [NodeName] -> NodeName -> [Graph] -> [Edge] -> Graph
 gGroupNestedWithLevel names level children edges =
     foldr
         (\name acc -> Group name Default [acc] [] Nothing)
-        (Group (last names) Default (map (gLevel level) children ) edges Nothing)
+        (Group (last names) Default (map (gLevel level) children) edges Nothing)
         (init names)
 
 gLevel :: NodeName -> Graph -> Graph

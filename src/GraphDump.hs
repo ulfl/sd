@@ -19,7 +19,7 @@ dumpGml fullGraph graph handle = do
 dumpNodes :: Handle -> Graph -> Graph -> IO [Edge]
 dumpNodes handle fullGraph graph = do
     case graph of
-        Box name (Just (Annotation _path nodeId parentId)) -> do
+        Node name dataRetention (Just (Annotation _path nodeId parentId)) -> do
             let nodeStr =
                     [str|node [
                         |   id %s
@@ -28,6 +28,7 @@ dumpNodes handle fullGraph graph = do
                         |     type "roundrectangle"
                         |     fill "#ffcc00"
                         |     outline "#000000"
+                        |     outlineWidth %s
                         |     w %s.0
                         |     h 30.0
                         |   ]
@@ -39,10 +40,11 @@ dumpNodes handle fullGraph graph = do
                 nodeStr
                 (show nodeId)
                 (show name)
+                (outlineWidth dataRetention)
                 (nodeWidth name)
                 (show parentId)
             pure []
-        Box _ Nothing -> internalError
+        Node _ _dataRetention Nothing -> internalError
         Group name style children edges (Just (Annotation _path nodeId parentId)) -> do
             let nodeStr =
                     [str|node [
@@ -95,7 +97,12 @@ dumpNodes handle fullGraph graph = do
     nodeWidth name =
         case (length $ show name) < 4 of
             True -> "30"
-            False -> printf "%d" ((length $ show name) * 9)
+            False -> printf "%d" ((length $ show name) * 10)
+    outlineWidth :: DataRetention -> String
+    outlineWidth Stateless = "1"
+    outlineWidth Days = "2"
+    outlineWidth Months = "3"
+    outlineWidth Years = "4"
 
 dumpEdge :: Handle -> Graph -> Edge -> IO ()
 dumpEdge handle fullGraph (Arrow n1 n2) = do
@@ -135,11 +142,11 @@ dumpEdge handle fullGraph (Arrow n1 n2) = do
     lookupNode' :: [NodeName] -> Graph -> [NodeId]
     lookupNode' path graph =
         case graph of
-            Box _name (Just (Annotation path' nodeId _parentId)) ->
+            Node _name _dataRetention (Just (Annotation path' nodeId _parentId)) ->
                 case path' == path of
                     True -> [nodeId]
                     False -> []
-            Box _ Nothing -> internalError
+            Node _ _dataRetention Nothing -> internalError
             Group _name _style children _edges (Just (Annotation path' nodeId _parentId)) ->
                 case path' == path of
                     True -> [nodeId]

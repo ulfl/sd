@@ -15,11 +15,12 @@ annotateGraph graph =
 annotateGraph' :: Graph -> [NodeName] -> NodeId -> NodeId -> (NodeId, Graph)
 annotateGraph' graph basePath nodeId parentId =
     case graph of
-        Box name _ ->
+        Node name dataRetention _ ->
             let nodeId' = inc nodeId
             in ( nodeId'
-               , Box
+               , Node
                      name
+                     dataRetention
                      (Just $
                       Annotation (appendToPath basePath [name]) nodeId' parentId))
         Group name style children edges _ ->
