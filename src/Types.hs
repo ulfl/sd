@@ -30,8 +30,8 @@ data DataRetention
     deriving (Eq, Show)
 
 data GroupStyle
-    = Default
-    | InvisibleLabel
+    = ShowLabel Bool
+    | LabelBackgroundColor String
     deriving (Eq, Show)
 
 data Edge =
@@ -43,6 +43,7 @@ data Annotation =
     Annotation [NodeName]
                NodeId
                NodeId
+               [GroupStyle]
     deriving (Show)
 
 data Graph
@@ -50,7 +51,6 @@ data Graph
            DataRetention
            (Maybe Annotation)
     | Group NodeName
-            GroupStyle
             [Graph]
             [Edge]
             (Maybe Annotation)
@@ -70,25 +70,21 @@ gActor = gNodeStateless
 gBox = gNodeStateless
 
 gGroup :: NodeName -> [Graph] -> [Edge] -> Graph
-gGroup name children edges = Group name Default children edges Nothing
-
-gGroupInvisibleLabel :: NodeName -> [Graph] -> [Edge] -> Graph
-gGroupInvisibleLabel name children edges =
-    Group name InvisibleLabel children edges Nothing
+gGroup name children edges = Group name children edges Nothing
 
 -- Recursively nest a set of graphs inside groups with the provided names.
 gGroupNested :: [NodeName] -> [Graph] -> [Edge] -> Graph
 gGroupNested names children edges =
     foldr
-        (\name acc -> Group name Default [acc] [] Nothing)
-        (Group (last names) Default children edges Nothing)
+        (\name acc -> Group name [acc] [] Nothing)
+        (Group (last names) children edges Nothing)
         (init names)
 
 gGroupNestedWithLevel :: [NodeName] -> NodeName -> [Graph] -> [Edge] -> Graph
 gGroupNestedWithLevel names level children edges =
     foldr
-        (\name acc -> Group name Default [acc] [] Nothing)
-        (Group (last names) Default (map (gLevel level) children) edges Nothing)
+        (\name acc -> Group name [acc] [] Nothing)
+        (Group (last names) (map (gLevel level) children) edges Nothing)
         (init names)
 
 gLevel :: NodeName -> Graph -> Graph

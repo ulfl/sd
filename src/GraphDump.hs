@@ -22,7 +22,7 @@ dumpGml' fullGraph graph handle = do
 dumpNodes :: Handle -> Graph -> Graph -> IO [Edge]
 dumpNodes handle fullGraph graph = do
     case graph of
-        Node name dataRetention (Just (Annotation _path nodeId parentId)) -> do
+        Node name dataRetention (Just (Annotation _path nodeId parentId style)) -> do
             let nodeStr =
                     [str|node [
                         |   id %s
@@ -48,7 +48,7 @@ dumpNodes handle fullGraph graph = do
                 (show parentId)
             pure []
         Node _ _dataRetention Nothing -> internalError
-        Group name style children edges (Just (Annotation _path nodeId parentId)) -> do
+        Group name children edges (Just (Annotation _path nodeId parentId style)) -> do
             let nodeStr =
                     [str|node [
                         |   id %s
@@ -68,7 +68,7 @@ dumpNodes handle fullGraph graph = do
                         | LabelGraphics
                         |  [
                         |    text "%s"
-                        |    fill "#EBEBEB"
+                        |    fill "%s"
                         |    fontSize 15
                         |    fontName	"Dialog"
                         |    alignment "left"
@@ -78,10 +78,10 @@ dumpNodes handle fullGraph graph = do
                         |  ]
                         |]
                 label =
-                    case style of
-                        Default ->
-                            (printf labelStr (show name) (show name)) :: String
-                        InvisibleLabel -> ""
+                    case showLabel style of
+                        True ->
+                            (printf labelStr (show name) (show name) (labelColor style)) :: String
+                        False -> ""
             hPrintf
                 handle
                 nodeStr
@@ -90,7 +90,7 @@ dumpNodes handle fullGraph graph = do
                 (show parentId)
             edges' <- mapM (dumpNodes handle fullGraph) children
             pure $ (edges ++ (concat edges'))
-        Group _ _ _ _ Nothing -> internalError
+        Group _ _ _ Nothing -> internalError
         Level _ child -> do
             edges <- dumpNodes handle fullGraph child
             pure edges
@@ -106,6 +106,14 @@ dumpNodes handle fullGraph graph = do
     outlineWidth Days = "2"
     outlineWidth Months = "3"
     outlineWidth Years = "4"
+    showLabel :: [GroupStyle] -> Bool
+    showLabel [] = True
+    showLabel ((ShowLabel False):_) = False
+    showLabel (_:x) = showLabel x
+    labelColor :: [GroupStyle] -> String
+    labelColor [] = "#EBEBEB"
+    labelColor ((LabelBackgroundColor x):_) = x
+    labelColor (_:x) = labelColor x
 
 dumpEdge :: Handle -> Graph -> Edge -> IO ()
 dumpEdge handle fullGraph (Arrow n1 n2) = do
@@ -145,16 +153,16 @@ dumpEdge handle fullGraph (Arrow n1 n2) = do
     lookupNode' :: [NodeName] -> Graph -> [NodeId]
     lookupNode' path graph =
         case graph of
-            Node _name _dataRetention (Just (Annotation path' nodeId _parentId)) ->
+            Node _name _dataRetention (Just (Annotation path' nodeId _parentId style)) ->
                 case path' == path of
                     True -> [nodeId]
                     False -> []
             Node _ _dataRetention Nothing -> internalError
-            Group _name _style children _edges (Just (Annotation path' nodeId _parentId)) ->
+            Group _name children _edges (Just (Annotation path' nodeId _parentId style)) ->
                 case path' == path of
                     True -> [nodeId]
                     False -> concat $ map (lookupNode' path) children
-            Group _ _ _ _ Nothing -> internalError
+            Group _ _ _ Nothing -> internalError
             Level _ child -> lookupNode' path child
             Empty -> []
 

@@ -11,17 +11,16 @@ import Types
 combineGraph :: Graph -> Graph
 combineGraph graph =
     case graph of
-        Group name style children edges Nothing ->
+        Group name children edges Nothing ->
             let (groups, other) =
                     partition
                         (\x ->
                              case x of
-                                 Group _ _ _ _ Nothing -> True
+                                 Group _ _ _ Nothing -> True
                                  _ -> False)
                         children
             in Group
                    name
-                   style
                    ((map combineGraph (meld groups)) ++ other)
                    edges
                    Nothing
@@ -31,23 +30,22 @@ meld :: [Graph] -> [Graph]
 meld groups = meld' groups'
   where
     groups' =
-        sortBy (\(Group n _ _ _ _) (Group n' _ _ _ _) -> compare n n') groups
+        sortBy (\(Group n _ _ _) (Group n' _ _ _) -> compare n n') groups
     
 meld' :: [Graph] -> [Graph]
-meld' ((Group name style children edges Nothing):(Group name' style' children' edges' Nothing):rest) =
-    case (name == name' && style == style') of
+meld' ((Group name children edges Nothing):(Group name' children' edges' Nothing):rest) =
+    case (name == name') of
         True ->
             let combined =
                     (Group
                           name
-                          style
                           (children ++ children')
                           (edges ++ edges')
                           Nothing)
             in meld (combined : rest)
         False ->
-            (Group name style children edges Nothing) :
-            meld' ((Group name' style' children' edges' Nothing) : rest)
+            (Group name children edges Nothing) :
+            meld' ((Group name' children' edges' Nothing) : rest)
 meld' graphs = graphs
 
 -- Remove all nodes below 'Level 'nodes with name 'NodeName'. Also remove all
@@ -56,8 +54,8 @@ pruneBelowLevel :: NodeName -> Graph -> Graph
 pruneBelowLevel level (Level level' graph)
     | level == level' = Empty
     | otherwise = graph
-pruneBelowLevel level (Group name style children edges Nothing) =
-    Group name style (map (pruneBelowLevel level) children) edges Nothing
+pruneBelowLevel level (Group name children edges Nothing) =
+    Group name (map (pruneBelowLevel level) children) edges Nothing
 pruneBelowLevel _level box@(Node _name _dataRetention Nothing) = box
 pruneBelowLevel _level Empty = Empty
 pruneBelowLevel _level _ = internalError
