@@ -1,5 +1,6 @@
 -- Copyright (C) 2017 Ulf Leopold.
 {-# LANGUAGE OverloadedStrings #-}
+
 module GraphOps where
 
 import Data.List (partition, sortBy)
@@ -29,19 +30,18 @@ combineGraph graph =
 meld :: [Graph] -> [Graph]
 meld groups = meld' groups'
   where
-    groups' =
-        sortBy (\(Group n _ _ _) (Group n' _ _ _) -> compare n n') groups
-    
+    groups' = sortBy (\(Group n _ _ _) (Group n' _ _ _) -> compare n n') groups
+
 meld' :: [Graph] -> [Graph]
 meld' ((Group name children edges Nothing):(Group name' children' edges' Nothing):rest) =
     case (name == name') of
         True ->
             let combined =
                     (Group
-                          name
-                          (children ++ children')
-                          (edges ++ edges')
-                          Nothing)
+                         name
+                         (children ++ children')
+                         (edges ++ edges')
+                         Nothing)
             in meld (combined : rest)
         False ->
             (Group name children edges Nothing) :

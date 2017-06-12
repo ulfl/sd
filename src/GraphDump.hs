@@ -80,14 +80,13 @@ dumpNodes handle fullGraph graph = do
                 label =
                     case showLabel style of
                         True ->
-                            (printf labelStr (show name) (show name) (labelColor style)) :: String
+                            (printf
+                                 labelStr
+                                 (show name)
+                                 (show name)
+                                 (labelColor style)) :: String
                         False -> ""
-            hPrintf
-                handle
-                nodeStr
-                (show nodeId)
-                label
-                (show parentId)
+            hPrintf handle nodeStr (show nodeId) label (show parentId)
             edges' <- mapM (dumpNodes handle fullGraph) children
             pure $ (edges ++ (concat edges'))
         Group _ _ _ Nothing -> internalError

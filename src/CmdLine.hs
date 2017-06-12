@@ -6,9 +6,9 @@ module CmdLine
     ( cmd
     ) where
 
+import Data.List (isInfixOf)
 import System.Console.CmdArgs
 import System.IO (Handle, stdout, withFile, IOMode(..), hPutStrLn)
-import Data.List (isInfixOf)
 
 import Graph
 import GraphDump
@@ -34,7 +34,9 @@ cmd = do
     Sd {inputFile = inFile, outputFile = outFile} <- (cmdArgs cfg)
     (graph, styling) <- interpretGraph inFile
     let res' =
-            ((annotateGraph styling) . combineGraph . (pruneBelowLevel "NodeDetails")) graph
+            ((annotateGraph styling) .
+             combineGraph . (pruneBelowLevel "NodeDetails"))
+                graph
     case outFile == "" of
         True -> dump stdout res'
         False -> withFile outFile WriteMode $ \handle -> do dump handle res'
