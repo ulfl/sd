@@ -48,7 +48,7 @@ dumpNodes handle fullGraph graph = do
                 (show parentId)
             pure []
         Node _ _dataRetention Nothing -> internalError
-        Group name children edges (Just (Annotation _path nodeId parentId style)) -> do
+        Group name _tags children edges (Just (Annotation _path nodeId parentId style)) -> do
             let nodeStr =
                     [str|node [
                         |   id %s
@@ -89,7 +89,7 @@ dumpNodes handle fullGraph graph = do
             hPrintf handle nodeStr (show nodeId) label (show parentId)
             edges' <- mapM (dumpNodes handle fullGraph) children
             pure $ (edges ++ (concat edges'))
-        Group _ _ _ Nothing -> internalError
+        Group _ _ _ _ Nothing -> internalError
         Level _ child -> do
             edges <- dumpNodes handle fullGraph child
             pure edges
@@ -157,11 +157,11 @@ dumpEdge handle fullGraph (Arrow n1 n2) = do
                     True -> [nodeId]
                     False -> []
             Node _ _dataRetention Nothing -> internalError
-            Group _name children _edges (Just (Annotation path' nodeId _parentId style)) ->
+            Group _name _tags children _edges (Just (Annotation path' nodeId _parentId style)) ->
                 case path' == path of
                     True -> [nodeId]
                     False -> concat $ map (lookupNode' path) children
-            Group _ _ _ Nothing -> internalError
+            Group _ _ _ _ Nothing -> internalError
             Level _ child -> lookupNode' path child
             Empty -> []
 

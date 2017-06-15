@@ -7,19 +7,19 @@ import Types
 
 -- Assign node numbers to all nodes in the graph and add annotation consisting
 -- of node numbers and the full node path.
-annotateGraph :: ([NodeName] -> [GroupStyle]) -> Graph -> Graph
+annotateGraph :: ([NodeName] -> [[Tag]] -> [GroupStyle]) -> Graph -> Graph
 annotateGraph styling graph =
-    let (_, graph') = annotateGraph' graph [] (NodeId 1) (NodeId 0) styling
+    let (_, graph') = annotateGraph' graph ([], []) (NodeId 1) (NodeId 0) styling
     in graph'
 
 annotateGraph'
     :: Graph
-    -> [NodeName]
+    -> ([NodeName], [[Tag]])
     -> NodeId
     -> NodeId
-    -> ([NodeName] -> [GroupStyle])
+    -> ([NodeName] -> [[Tag]] -> [GroupStyle])
     -> (NodeId, Graph)
-annotateGraph' graph basePath nodeId parentId styling =
+annotateGraph' graph (namePath, tagPath) nodeId parentId styling =
     case graph of
         Node name dataRetention _ ->
             let nodeId' = inc nodeId
@@ -29,34 +29,38 @@ annotateGraph' graph basePath nodeId parentId styling =
                      dataRetention
                      (Just $
                       Annotation
-                          (appendToPath basePath [name])
+                          (appendToPath namePath name)
                           nodeId'
                           parentId
                           []))
-        Group name children edges _ ->
+        Group name tags children edges _ ->
             let nodeId' = inc nodeId
-                path' = appendToPath basePath [name]
+                path' = appendToPath namePath name
+                tagPath' = appendToPath tagPath tags
                 (nodeId'', annotatedChildren) =
-                    annotateChildren children path' nodeId' nodeId' styling
+                    annotateChildren children (path', tagPath') nodeId' nodeId' styling
             in ( nodeId''
                , Group
                      name
+                     tags
                      annotatedChildren
                      (scopeEdges path' edges)
-                     (Just (Annotation path' nodeId' parentId (styling path'))))
-        Level _ child -> annotateGraph' child basePath nodeId parentId styling
+                     (Just (Annotation path' nodeId' parentId (styling path' tagPath'))))
+        Level _ child -> annotateGraph' child (namePath, tagPath) nodeId parentId styling
         Empty -> (nodeId, Empty)
   where
     inc :: NodeId -> NodeId
     inc (NodeId x) = NodeId (x + 1)
-    appendToPath :: [NodeName] -> [NodeName] -> [NodeName]
-    appendToPath path name = path ++ name
+    appendToPath :: [a] -> a -> [a]
+    appendToPath path name = path ++ [name]
+    appendNamePaths :: [NodeName] -> [NodeName] -> [NodeName]
+    appendNamePaths p1 p2 = p1 ++ p2
     annotateChildren
         :: [Graph]
-        -> [NodeName]
+        -> ([NodeName], [[Tag]])
         -> NodeId
         -> NodeId
-        -> ([NodeName] -> [GroupStyle])
+        -> ([NodeName] -> [[Tag]] -> [GroupStyle])
         -> (NodeId, [Graph])
     annotateChildren [] _cPath cNodeId _cParentId styling = (cNodeId, [])
     annotateChildren (c:children) cPath cNodeId cParentId styling =
@@ -67,5 +71,5 @@ annotateGraph' graph basePath nodeId parentId styling =
     scopeEdges :: [NodeName] -> [Edge] -> [Edge]
     scopeEdges _path [] = []
     scopeEdges path ((Arrow name1 name2):edges) =
-        (Arrow (appendToPath path name1) (appendToPath path name2)) :
+        (Arrow (appendNamePaths path name1) (appendNamePaths path name2)) :
         scopeEdges path edges

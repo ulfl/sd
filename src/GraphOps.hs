@@ -3,7 +3,7 @@
 
 module GraphOps where
 
-import Data.List (partition, sortBy)
+import Data.List (partition, sortBy, sort, nub)
 
 import Types
 
@@ -12,16 +12,17 @@ import Types
 combineGraph :: Graph -> Graph
 combineGraph graph =
     case graph of
-        Group name children edges Nothing ->
+        Group name tags children edges Nothing ->
             let (groups, other) =
                     partition
                         (\x ->
                              case x of
-                                 Group _ _ _ Nothing -> True
+                                 Group _ _ _ _ Nothing -> True
                                  _ -> False)
                         children
             in Group
                    name
+                   tags
                    ((map combineGraph (meld groups)) ++ other)
                    edges
                    Nothing
@@ -30,22 +31,23 @@ combineGraph graph =
 meld :: [Graph] -> [Graph]
 meld groups = meld' groups'
   where
-    groups' = sortBy (\(Group n _ _ _) (Group n' _ _ _) -> compare n n') groups
+    groups' = sortBy (\(Group n _ _ _ _) (Group n' _ _ _ _) -> compare n n') groups
 
 meld' :: [Graph] -> [Graph]
-meld' ((Group name children edges Nothing):(Group name' children' edges' Nothing):rest) =
-    case (name == name') of
+meld' ((Group name tags children edges Nothing):(Group name' tags' children' edges' Nothing):rest) =
+    case (name == name' && ((nub . sort) tags == (nub . sort) tags')) of
         True ->
             let combined =
                     (Group
                          name
+                         tags
                          (children ++ children')
                          (edges ++ edges')
                          Nothing)
             in meld (combined : rest)
         False ->
-            (Group name children edges Nothing) :
-            meld' ((Group name' children' edges' Nothing) : rest)
+            (Group name tags children edges Nothing) :
+            meld' ((Group name' tags' children' edges' Nothing) : rest)
 meld' graphs = graphs
 
 -- Remove all nodes below 'Level 'nodes with name 'NodeName'. Also remove all
@@ -54,8 +56,8 @@ pruneBelowLevel :: NodeName -> Graph -> Graph
 pruneBelowLevel level (Level level' graph)
     | level == level' = Empty
     | otherwise = graph
-pruneBelowLevel level (Group name children edges Nothing) =
-    Group name (map (pruneBelowLevel level) children) edges Nothing
+pruneBelowLevel level (Group name tags children edges Nothing) =
+    Group name tags (map (pruneBelowLevel level) children) edges Nothing
 pruneBelowLevel _level box@(Node _name _dataRetention Nothing) = box
 pruneBelowLevel _level Empty = Empty
 pruneBelowLevel _level _ = internalError

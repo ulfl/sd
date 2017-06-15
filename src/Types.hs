@@ -19,8 +19,15 @@ newtype NodeName =
     NodeName String
     deriving (Eq, Ord, IsString)
 
+newtype Tag =
+    Tag String
+    deriving (Eq, Ord, IsString)
+
 instance Show NodeName where
     show (NodeName name) = printf "%s" name
+
+instance Show Tag where
+    show (Tag name) = printf "%s" name
 
 data DataRetention
     = Stateless
@@ -51,6 +58,7 @@ data Graph
            DataRetention
            (Maybe Annotation)
     | Group NodeName
+            [Tag]
             [Graph]
             [Edge]
             (Maybe Annotation)
@@ -70,21 +78,27 @@ gActor = gNodeStateless
 gBox = gNodeStateless
 
 gGroup :: NodeName -> [Graph] -> [Edge] -> Graph
-gGroup name children edges = Group name children edges Nothing
+gGroup name children edges = gGroupTagged name [] children edges
+
+gGroupTagged :: NodeName -> [Tag] -> [Graph] -> [Edge] -> Graph
+gGroupTagged name tags children edges = Group name tags children edges Nothing
 
 -- Recursively nest a set of graphs inside groups with the provided names.
 gGroupNested :: [NodeName] -> [Graph] -> [Edge] -> Graph
-gGroupNested names children edges =
+gGroupNested names children edges = gGroupNestedTagged names [] children edges
+
+gGroupNestedTagged :: [NodeName] -> [Tag] -> [Graph] -> [Edge] -> Graph
+gGroupNestedTagged names tags children edges =
     foldr
-        (\name acc -> Group name [acc] [] Nothing)
-        (Group (last names) children edges Nothing)
+        (\name acc -> Group name [] [acc] [] Nothing)
+        (Group (last names) tags children edges Nothing)
         (init names)
 
-gGroupNestedWithLevel :: [NodeName] -> NodeName -> [Graph] -> [Edge] -> Graph
-gGroupNestedWithLevel names level children edges =
+gGroupNestedWithLevel :: [NodeName] -> [Tag] -> NodeName -> [Graph] -> [Edge] -> Graph
+gGroupNestedWithLevel names tags level children edges =
     foldr
-        (\name acc -> Group name [acc] [] Nothing)
-        (Group (last names) (map (gLevel level) children) edges Nothing)
+        (\name acc -> Group name [] [acc] [] Nothing)
+        (Group (last names) tags (map (gLevel level) children) edges Nothing)
         (init names)
 
 gLevel :: NodeName -> Graph -> Graph
