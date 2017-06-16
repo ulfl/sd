@@ -29,7 +29,7 @@ dumpNodes handle fullGraph graph = do
                         |   label "%s"
                         |   graphics [
                         |     type "roundrectangle"
-                        |     fill "#ffcc00"
+                        |     fill "%s"
                         |     outline "#000000"
                         |     outlineWidth %s
                         |     w %s.0
@@ -43,6 +43,7 @@ dumpNodes handle fullGraph graph = do
                 nodeStr
                 (show nodeId)
                 (show name)
+                (backgroundColor style)
                 (outlineWidth dataRetention)
                 (nodeWidth name)
                 (show parentId)
@@ -105,14 +106,18 @@ dumpNodes handle fullGraph graph = do
     outlineWidth Days = "2"
     outlineWidth Months = "3"
     outlineWidth Years = "4"
-    showLabel :: [GroupStyle] -> Bool
+    showLabel :: [Style] -> Bool
     showLabel [] = True
     showLabel ((ShowLabel False):_) = False
     showLabel (_:x) = showLabel x
-    labelColor :: [GroupStyle] -> String
-    labelColor [] = "#EBEBEB"
+    labelColor :: [Style] -> String
+    labelColor [] = "#ebebeb"
     labelColor ((LabelBackgroundColor x):_) = x
     labelColor (_:x) = labelColor x
+    backgroundColor :: [Style] -> String
+    backgroundColor [] = "#ffcc00"
+    backgroundColor ((BackgroundColor x):_) = x
+    backgroundColor (_:x) = backgroundColor x
 
 dumpEdge :: Handle -> Graph -> Edge -> IO ()
 dumpEdge handle fullGraph (Arrow n1 n2) = do

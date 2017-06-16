@@ -7,7 +7,7 @@ import Types
 
 -- Assign node numbers to all nodes in the graph and add annotation consisting
 -- of node numbers and the full node path.
-annotateGraph :: (Graph -> [NodeName] -> [[Tag]] -> [GroupStyle])
+annotateGraph :: (Graph -> [NodeName] -> [[Tag]] -> [Style])
  -> Graph -> Graph
 annotateGraph styling graph =
     let (_, graph') = annotateGraph' graph ([], []) (NodeId 1) (NodeId 0) styling
@@ -18,7 +18,7 @@ annotateGraph'
     -> ([NodeName], [[Tag]])
     -> NodeId
     -> NodeId
-    -> (Graph -> [NodeName] -> [[Tag]] -> [GroupStyle])
+    -> (Graph -> [NodeName] -> [[Tag]] -> [Style])
 
     -> (NodeId, Graph)
 annotateGraph' graph (namePath, tagPath) nodeId parentId styling =
@@ -63,7 +63,7 @@ annotateGraph' graph (namePath, tagPath) nodeId parentId styling =
         -> ([NodeName], [[Tag]])
         -> NodeId
         -> NodeId
-        -> (Graph -> [NodeName] -> [[Tag]] -> [GroupStyle])
+        -> (Graph -> [NodeName] -> [[Tag]] -> [Style])
 
         -> (NodeId, [Graph])
     annotateChildren [] _cPath cNodeId _cParentId styling = (cNodeId, [])

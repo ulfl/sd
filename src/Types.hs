@@ -36,9 +36,10 @@ data DataRetention
     | Years
     deriving (Eq, Show)
 
-data GroupStyle
+data Style
     = ShowLabel Bool
     | LabelBackgroundColor String
+    | BackgroundColor String
     deriving (Eq, Show)
 
 data Edge =
@@ -50,7 +51,7 @@ data Annotation =
     Annotation [NodeName]
                NodeId
                NodeId
-               [GroupStyle]
+               [Style]
     deriving (Show)
 
 data Graph

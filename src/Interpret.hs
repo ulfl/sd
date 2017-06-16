@@ -11,9 +11,9 @@ import Text.Printf (printf)
 
 import Types
 
-interpretGraph :: FilePath -> IO (Graph, (Graph -> [NodeName] -> [[Tag]] -> [GroupStyle]))
+interpretGraph :: FilePath -> IO (Graph, (Graph -> [NodeName] -> [[Tag]] -> [Style]))
 interpretGraph filePath =
-    interpretHaskell filePath (as :: (Graph, (Graph -> [NodeName] -> [[Tag]] -> [GroupStyle])))
+    interpretHaskell filePath (as :: (Graph, (Graph -> [NodeName] -> [[Tag]] -> [Style])))
 
 interpretHaskell
     :: Typeable a
