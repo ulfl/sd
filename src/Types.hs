@@ -74,8 +74,10 @@ gNodeStateless name = Node name Stateless Nothing
 gNode :: NodeName -> DataRetention -> Graph
 gNode name dataRetention = Node name dataRetention Nothing
 
+gActor :: NodeName -> Graph
 gActor = gNodeStateless
 
+gBox :: NodeName -> Graph
 gBox = gNodeStateless
 
 gGroup :: NodeName -> [Graph] -> [Edge] -> Graph

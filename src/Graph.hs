@@ -64,13 +64,12 @@ annotateGraph' graph (namePath, tagPath) nodeId parentId styling =
         -> NodeId
         -> NodeId
         -> (Graph -> [NodeName] -> [[Tag]] -> [Style])
-
         -> (NodeId, [Graph])
-    annotateChildren [] _cPath cNodeId _cParentId styling = (cNodeId, [])
-    annotateChildren (c:children) cPath cNodeId cParentId styling =
-        let (nodeId', ac) = annotateGraph' c cPath cNodeId cParentId styling
+    annotateChildren [] _cPath cNodeId _cParentId _cStyling = (cNodeId, [])
+    annotateChildren (c:children) cPath cNodeId cParentId cStyling =
+        let (nodeId', ac) = annotateGraph' c cPath cNodeId cParentId cStyling
             (nodeId'', acs) =
-                annotateChildren children cPath nodeId' cParentId styling
+                annotateChildren children cPath nodeId' cParentId cStyling
         in (nodeId'', ac : acs)
     scopeEdges :: [NodeName] -> [Edge] -> [Edge]
     scopeEdges _path [] = []

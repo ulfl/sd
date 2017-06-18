@@ -6,7 +6,6 @@ module CmdLine
     ( cmd
     ) where
 
-import Data.List (isInfixOf)
 import System.Console.CmdArgs
 import System.IO (Handle, stdout, withFile, IOMode(..), hPutStrLn)
 

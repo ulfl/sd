@@ -157,12 +157,12 @@ dumpEdge handle fullGraph (Arrow n1 n2) = do
     lookupNode' :: [NodeName] -> Graph -> [NodeId]
     lookupNode' path graph =
         case graph of
-            Node _name _dataRetention (Just (Annotation path' nodeId _parentId style)) ->
+            Node _name _dataRetention (Just (Annotation path' nodeId _parentId _style)) ->
                 case path' == path of
                     True -> [nodeId]
                     False -> []
             Node _ _dataRetention Nothing -> internalError
-            Group _name _tags children _edges (Just (Annotation path' nodeId _parentId style)) ->
+            Group _name _tags children _edges (Just (Annotation path' nodeId _parentId _style)) ->
                 case path' == path of
                     True -> [nodeId]
                     False -> concat $ map (lookupNode' path) children
