@@ -33,7 +33,14 @@ dumpNodes handle fullGraph graph = do
                         |     outline "#000000"
                         |     outlineWidth %s
                         |     w %s.0
-                        |     h 30.0
+                        |     h 75.0
+                        |   ]
+                        |   LabelGraphics
+                        |   [
+                        |     text	"%s"
+                        |     fontSize	24
+                        |     fontName	"Dialog"
+                        |     anchor	"c"
                         |   ]
                         |   gid %s
                         | ]
@@ -46,6 +53,7 @@ dumpNodes handle fullGraph graph = do
                 (backgroundColor style)
                 (outlineWidth dataRetention)
                 (nodeWidth name)
+                (show name)
                 (show parentId)
             pure []
         Node _ _dataRetention Nothing -> internalError
@@ -70,7 +78,7 @@ dumpNodes handle fullGraph graph = do
                         |  [
                         |    text "%s"
                         |    fill "%s"
-                        |    fontSize 15
+                        |    fontSize 28
                         |    fontName	"Dialog"
                         |    alignment "left"
                         |    autoSizePolicy "node_width"
@@ -98,14 +106,14 @@ dumpNodes handle fullGraph graph = do
   where
     nodeWidth :: NodeName -> String
     nodeWidth name =
-        case (length $ show name) < 4 of
-            True -> "30"
-            False -> printf "%d" ((length $ show name) * 10)
+        case (length $ show name) <= 4 of
+            True -> "75"
+            False -> printf "%d" ((length $ show name) * 17)
     outlineWidth :: DataRetention -> String
     outlineWidth Stateless = "1"
     outlineWidth Days = "2"
-    outlineWidth Months = "3"
-    outlineWidth Years = "4"
+    outlineWidth Months = "4"
+    outlineWidth Years = "6"
     showLabel :: [Style] -> Bool
     showLabel [] = True
     showLabel ((ShowLabel False):_) = False
@@ -128,6 +136,7 @@ dumpEdge handle fullGraph (Arrow n1 n2) = do
                 |   target %s
                 |   graphics
                 |   [
+                |     width 2
                 |     fill "#000000"
                 |     targetArrow "standard"
                 |   ]
