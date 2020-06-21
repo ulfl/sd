@@ -2,7 +2,7 @@
 module Interpret where
 
 import Data.Char (toUpper, toLower)
-import Data.Typeable.Internal (Typeable)
+import Data.Typeable (Typeable)
 import Language.Haskell.Interpreter
        (runInterpreter, loadModules, setImports, interpret, as,
         InterpreterError(..), GhcError(..))

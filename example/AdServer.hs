@@ -5,8 +5,11 @@ module AdServer where
 import Types
 import Utils
 
-main :: Graph
-main = gGroup "My System" [euSetup] []
+main :: (Graph, (Graph -> [NodeName] -> [[Tag]] -> [Style]))
+main = (gGroup "My System" [euSetup] [], styling)
+  where
+    styling :: Graph -> [NodeName] -> [[Tag]] -> [Style]
+    styling graph path tagPath = []
 
 euSetup :: Graph
 euSetup =

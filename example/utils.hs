@@ -21,7 +21,7 @@ nodesInGroups baseName groups =
 pathsOfNodesInGroup :: [Graph] -> [[NodeName]]
 pathsOfNodesInGroup groups = concat $ map groupToPath groups
   where
-    groupToPath (Group name [Group name' boxes _ _] _ _) =
-        map (\(Box name'' _) -> [name, name', name'']) boxes
-    groupToPath (Group name _ boxes _ _) =
-        map (\(Box name' _) -> [name, name']) boxes
+    groupToPath (Group name _tags [Group name' _tags' boxes _ _] _ _) =
+        map (\(Node name'' _ _) -> [name, name', name'']) boxes
+    groupToPath (Group name _tags boxes _ _) =
+        map (\(Node name' _ _) -> [name, name']) boxes
