@@ -74,5 +74,5 @@ annotateGraph' graph (namePath, tagPath) nodeId parentId styling =
     scopeEdges :: [NodeName] -> [Edge] -> [Edge]
     scopeEdges _path [] = []
     scopeEdges path ((Arrow name1 name2):edges) =
-        (Arrow (appendNamePaths path name1) (appendNamePaths path name2)) :
+        Arrow (appendNamePaths path name1) (appendNamePaths path name2) :
         scopeEdges path edges

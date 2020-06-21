@@ -10,63 +10,52 @@ import Data.String (IsString)
 import Text.Printf (printf)
 
 newtype NodeId =
-    NodeId Integer
+  NodeId Integer
 
 instance Show NodeId where
-    show (NodeId nodeId) = show nodeId
+  show (NodeId nodeId) = show nodeId
 
 newtype NodeName =
-    NodeName String
-    deriving (Eq, Ord, IsString)
+  NodeName String
+  deriving (Eq, Ord, IsString)
 
 newtype Tag =
-    Tag String
-    deriving (Eq, Ord, IsString)
+  Tag String
+  deriving (Eq, Ord, IsString)
 
 instance Show NodeName where
-    show (NodeName name) = printf "%s" name
+  show (NodeName name) = printf "%s" name
 
 instance Show Tag where
-    show (Tag name) = printf "%s" name
+  show (Tag name) = printf "%s" name
 
 data DataRetention
-    = Stateless
-    | Days
-    | Months
-    | Years
-    deriving (Eq, Show)
+  = Stateless
+  | Days
+  | Months
+  | Years
+  deriving (Eq, Show)
 
 data Style
-    = ShowLabel Bool
-    | LabelBackgroundColor String
-    | BackgroundColor String
-    deriving (Eq, Show)
+  = ShowLabel Bool
+  | LabelBackgroundColor String
+  | BackgroundColor String
+  deriving (Eq, Show)
 
 data Edge =
-    Arrow [NodeName]
-          [NodeName]
-    deriving (Show)
+  Arrow [NodeName] [NodeName]
+  deriving (Show)
 
 data Annotation =
-    Annotation [NodeName]
-               NodeId
-               NodeId
-               [Style]
-    deriving (Show)
+  Annotation [NodeName] NodeId NodeId [Style]
+  deriving (Show)
 
 data Graph
-    = Node NodeName
-           DataRetention
-           (Maybe Annotation)
-    | Group NodeName
-            [Tag]
-            [Graph]
-            [Edge]
-            (Maybe Annotation)
-    | Level NodeName
-            Graph
-    | Empty
-    deriving (Show)
+  = Node NodeName DataRetention (Maybe Annotation)
+  | Group NodeName [Tag] [Graph] [Edge] (Maybe Annotation)
+  | Level NodeName Graph
+  | Empty
+  deriving (Show)
 
 gNodeStateless :: NodeName -> Graph
 gNodeStateless name = Node name Stateless Nothing
@@ -92,17 +81,18 @@ gGroupNested names children edges = gGroupNestedTagged names [] children edges
 
 gGroupNestedTagged :: [NodeName] -> [Tag] -> [Graph] -> [Edge] -> Graph
 gGroupNestedTagged names tags children edges =
-    foldr
-        (\name acc -> Group name [] [acc] [] Nothing)
-        (Group (last names) tags children edges Nothing)
-        (init names)
+  foldr
+    (\name acc -> Group name [] [acc] [] Nothing)
+    (Group (last names) tags children edges Nothing)
+    (init names)
 
-gGroupNestedWithLevel :: [NodeName] -> [Tag] -> NodeName -> [Graph] -> [Edge] -> Graph
+gGroupNestedWithLevel ::
+     [NodeName] -> [Tag] -> NodeName -> [Graph] -> [Edge] -> Graph
 gGroupNestedWithLevel names tags level children edges =
-    foldr
-        (\name acc -> Group name [] [acc] [] Nothing)
-        (Group (last names) tags (map (gLevel level) children) edges Nothing)
-        (init names)
+  foldr
+    (\name acc -> Group name [] [acc] [] Nothing)
+    (Group (last names) tags (map (gLevel level) children) edges Nothing)
+    (init names)
 
 gLevel :: NodeName -> Graph -> Graph
 gLevel name child = Level name child
